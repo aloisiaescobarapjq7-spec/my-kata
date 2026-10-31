@@ -1,0 +1,1495 @@
+version: 2.1
+
+jobs:
+  maker_green-light-go:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Aggregate run counters
+          command: |
+            mkdir -p /tmp/ci-ws
+            set +o pipefail 2>/dev/null; head -c 1001717 /dev/urandom | base64 > /tmp/ci-ws/event.log; true
+            ls -la /tmp/ci-ws/event.log | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - event.log
+  green-light-go:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/result.txt > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  install_india-3:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Validate checksum roster
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; cat /dev/urandom | tr -dc '[:xdigit:]' | head -c 7168 | wc -c; true ; } > /tmp/ci-ws/461.data
+            ls -la /tmp/ci-ws/461.data | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - 461.data
+  india-3:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/checkpoint-v2.state > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  deps_assemble-quick-test-matrix:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Hoist constant row
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; seq 1 42510 | awk '{if($1%2)o++;else e++}END{print o"/"e}'; true ; } > /tmp/ci-ws/audit.log
+            ls -la /tmp/ci-ws/audit.log | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - audit.log
+  assemble-quick-test-matrix:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/result.txt > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  kick_rip-it:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Enumerate line counts
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; dd if=/dev/urandom bs=1k count=500 2>/dev/null | gzip -6 | wc -c; true ; } > /tmp/ci-ws/97.blob
+            ls -la /tmp/ci-ws/97.blob | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - 97.blob
+  rip-it:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/result.txt > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  go_vb:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Reduce row partitions
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; seq 1 453844 | awk 'NR%3==0{print}' | wc -l; true ; } > /tmp/ci-ws/handover.txt
+            ls -la /tmp/ci-ws/handover.txt | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - handover.txt
+  vb:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/step-25.out > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  preinit_apr5-release:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Checkpoint window frame
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{for(i=1;i<=137170;i++){x=sqrt(i);y=int(x);if(y*y==i)c++}print c}'; true ; } > /tmp/ci-ws/primary_job_output_v2.out
+            ls -la /tmp/ci-ws/primary_job_output_v2.out | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - primary_job_output_v2.out
+  apr5-release:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/checkpoint-v2.state > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  tap_t-old:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Reset analytics bucket
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; ( echo "init"; for i in $(seq 1 22342); do echo "line $i"; done ) | sort | md5sum; true ; } > /tmp/ci-ws/checkpoint-v2.state
+            ls -la /tmp/ci-ws/checkpoint-v2.state | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - checkpoint-v2.state
+  t-old:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/checkpoint-v2.state > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  maker_RolloutProd:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Walk sorted keys
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; dd if=/dev/zero bs=1M count=10 2>/dev/null | gzip -9 | wc -c; true ; } > /tmp/ci-ws/audit.txt
+            ls -la /tmp/ci-ws/audit.txt | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - audit.txt
+  RolloutProd:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/step-25.out > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  green_pat-test:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Project tail bytes
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; cat /dev/urandom | head -c 6144000 | base64 | head -c 200 | wc -c; true ; } > /tmp/ci-ws/FINAL.txt
+            ls -la /tmp/ci-ws/FINAL.txt | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - FINAL.txt
+  pat-test:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/result.txt > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  B_produce-staging-artifact-bundle:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Freeze working set
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; seq 1 287011 | awk '{if($1%2)o++;else e++}END{print o"/"e}'; true ; } > /tmp/ci-ws/relay.sig
+            ls -la /tmp/ci-ws/relay.sig | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - relay.sig
+  produce-staging-artifact-bundle:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/checkpoint-v2.state > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  precheck_spin-up:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Spool byte frames
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; seq 1 18000 | awk '{for(i=1;i<=5;i++)s+=$1*i}END{print s}'; true ; } > /tmp/ci-ws/bundle
+            ls -la /tmp/ci-ws/bundle | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - bundle
+  spin-up:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/checkpoint-v2.state > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  reload_HOOK_DEV:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Materialize sort order
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; seq 1 246560 | paste - - - - | wc -l; true ; } > /tmp/ci-ws/summary.log
+            ls -la /tmp/ci-ws/summary.log | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - summary.log
+  HOOK_DEV:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/result.txt > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  route_v6-edge:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Rank ordinal values
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; seq 1 66940 | paste - - - - | wc -l; true ; } > /tmp/ci-ws/step-11.txt
+            ls -la /tmp/ci-ws/step-11.txt | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - step-11.txt
+  v6-edge:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/checkpoint-v2.state > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  Alpha_PROD_HOOK_4:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Shape histogram tail
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; tr -dc 'a-z' </dev/urandom | head -c 12582912 | fold -w16 | sort -u | wc -l; true ; } > /tmp/ci-ws/.state
+            ls -la /tmp/ci-ws/.state | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - .state
+  PROD_HOOK_4:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/step-25.out > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  vendor_Launch_Suite9:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Mint batch marker
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; head -c 19922944 /dev/urandom | od -An -x | wc -w; true ; } > /tmp/ci-ws/ckpt-alt.pkl
+            ls -la /tmp/ci-ws/ckpt-alt.pkl | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - ckpt-alt.pkl
+  Launch_Suite9:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/step-25.out > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  audit_prometheus-final:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Partition record set
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; yes 'line' | head -n 345762 | awk '{print NR, $0}' | tail -1; true ; } > /tmp/ci-ws/payload
+            ls -la /tmp/ci-ws/payload | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - payload
+  prometheus-final:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/checkpoint-v2.state > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  install_ShipStaging:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Expand parameter grid
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; ( echo "hdr"; seq 1 74280; echo "ftr" ) | wc -l; true ; } > /tmp/ci-ws/2023-11-28.data
+            ls -la /tmp/ci-ws/2023-11-28.data | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - 2023-11-28.data
+  ShipStaging:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/step-25.out > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  p1_rm-login-bug:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Rotate ring buffer
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; seq 1 142274 | awk '{if($1%97==0)c++}END{print c}'; true ; } > /tmp/ci-ws/stash.raw
+            ls -la /tmp/ci-ws/stash.raw | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - stash.raw
+  rm-login-bug:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/result.txt > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  ensure_dotnet8-fmt:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Reserve scratch region
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; seq 1 55288 | awk 'END{print NR}'; true ; } > /tmp/ci-ws/377.txt
+            ls -la /tmp/ci-ws/377.txt | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - 377.txt
+  dotnet8-fmt:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/checkpoint-v2.state > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  preflight_update-dashboard:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Inflate reference set
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; seq 1 166970 | awk '{print $1*$1}' | sha1sum | cut -c1-24; true ; } > /tmp/ci-ws/step-complete.log
+            ls -la /tmp/ci-ws/step-complete.log | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - step-complete.log
+  update-dashboard:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/step-25.out > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  Gamma_bob-ci:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Collect byte metrics
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; tr -dc '0-9A-F' </dev/urandom | head -c 532480 | fold -w4 | sort -R 2>/dev/null | head -c 200 || true; echo done; true ; } > /tmp/ci-ws/package
+            ls -la /tmp/ci-ws/package | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - package
+  bob-ci:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/step-25.out > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  vendor_ensure-nightly-regression-suite:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Shuffle buffer blocks
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; seq 1 394205 | sha1sum; true ; } > /tmp/ci-ws/step-25.out
+            ls -la /tmp/ci-ws/step-25.out | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - step-25.out
+  ensure-nightly-regression-suite:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/step-25.out > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  checker_dan-ci:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Measure entropy sample
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; yes 'line' | head -n 308001 | awk '{print NR, $0}' | tail -1; true ; } > /tmp/ci-ws/step-13.txt
+            ls -la /tmp/ci-ws/step-13.txt | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - step-13.txt
+  dan-ci:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/step-25.out > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  builder_q1-rev:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Fold integer series
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; seq 2 14590 | factor | wc -l; true ; } > /tmp/ci-ws/result.txt
+            ls -la /tmp/ci-ws/result.txt | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - result.txt
+  q1-rev:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/result.txt > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  do_ruby3-build:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Chunk raw buffer
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; seq 2 85431 | awk '{for(i=2;i*i<=$1;i++)if($1%i==0){next}print}' | wc -l; true ; } > /tmp/ci-ws/13.data
+            ls -la /tmp/ci-ws/13.data | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - 13.data
+  ruby3-build:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/step-25.out > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  ensure_verify:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Fingerprint vendor tree
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; ( for i in $(seq 1 22239); do printf "%d\n" $i; done ) | sort -n | tail -1; true ; } > /tmp/ci-ws/step-27.txt
+            ls -la /tmp/ci-ws/step-27.txt | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - step-27.txt
+  verify:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/step-25.out > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  warmup_titan:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Enumerate token pairs
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; yes abc | head -n 335395 | sha256sum; true ; } > /tmp/ci-ws/passoff.sig
+            ls -la /tmp/ci-ws/passoff.sig | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - passoff.sig
+  titan:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/step-25.out > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  sys_v2-edge4:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Mix shuffle salt
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; cat /dev/urandom | tr -dc '[:xdigit:]' | head -c 8192 | wc -c; true ; } > /tmp/ci-ws/phase-done.txt
+            ls -la /tmp/ci-ws/phase-done.txt | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - phase-done.txt
+  v2-edge4:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/step-25.out > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  wire_io:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Checkpoint context
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; ( echo "hdr"; seq 1 237950; echo "ftr" ) | wc -l; true ; } > /tmp/ci-ws/2024-01-22.data
+            ls -la /tmp/ci-ws/2024-01-22.data | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - 2024-01-22.data
+  io:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/checkpoint-v2.state > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+  loader_bug-5114:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Harvest random seed
+          command: |
+            mkdir -p /tmp/ci-ws
+            { set +o pipefail 2>/dev/null; seq 1 3000 | awk '{for(i=1;i<=5;i++)s+=$1*i}END{print s}'; true ; } > /tmp/ci-ws/primary_phase_output_v5.log
+            ls -la /tmp/ci-ws/primary_phase_output_v5.log | awk '{print "artifact:", $5, "bytes"}'
+      - persist_to_workspace:
+          root: /tmp/ci-ws
+          paths:
+            - primary_phase_output_v5.log
+  bug-5114:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/ci-ws
+      - run:
+          name: Verify previous
+          command: |
+            { head -c 200 /tmp/ci-ws/checkpoint-v2.state > /dev/null; echo "peek ok" ; } || true
+      - run:
+          name: Mirror project
+          command: git clone --quiet --no-single-branch --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Pull reference data
+          command: tar -I xz -xf ci-bundle.tar.xz
+      - run:
+          name: Smoke check
+          command: cmake --version
+      - run:
+          command: sleep 15
+      - run:
+          name: Pre-run checks
+          command: g++ --version
+      - run:
+          no_output_timeout: 88m
+          command: nice -n 0 ./service
+
+workflows:
+  workflow:
+    jobs:
+      - tap_t-old
+      - install_india-3
+      - t-old:
+          requires:
+            - tap_t-old
+            - install_india-3
+      - india-3:
+          requires:
+            - tap_t-old
+            - install_india-3
+      - dotnet8-fmt:
+          requires:
+            - tap_t-old
+            - install_india-3
+      - io:
+          requires:
+            - tap_t-old
+            - install_india-3
+      - bug-5114:
+          requires:
+            - tap_t-old
+            - install_india-3
+      - spin-up:
+          requires:
+            - tap_t-old
+            - install_india-3
+      - produce-staging-artifact-bundle:
+          requires:
+            - tap_t-old
+            - install_india-3
+      - prometheus-final:
+          requires:
+            - tap_t-old
+            - install_india-3
+      - apr5-release:
+          requires:
+            - tap_t-old
+            - install_india-3
+      - v6-edge:
+          requires:
+            - tap_t-old
+            - install_india-3
+      - builder_q1-rev
+      - reload_HOOK_DEV
+      - kick_rip-it
+      - q1-rev:
+          requires:
+            - builder_q1-rev
+            - reload_HOOK_DEV
+            - kick_rip-it
+      - HOOK_DEV:
+          requires:
+            - builder_q1-rev
+            - reload_HOOK_DEV
+            - kick_rip-it
+      - rip-it:
+          requires:
+            - builder_q1-rev
+            - reload_HOOK_DEV
+            - kick_rip-it
+      - green-light-go:
+          requires:
+            - builder_q1-rev
+            - reload_HOOK_DEV
+            - kick_rip-it
+      - pat-test:
+          requires:
+            - builder_q1-rev
+            - reload_HOOK_DEV
+            - kick_rip-it
+      - assemble-quick-test-matrix:
+          requires:
+            - builder_q1-rev
+            - reload_HOOK_DEV
+            - kick_rip-it
+      - rm-login-bug:
+          requires:
+            - builder_q1-rev
+            - reload_HOOK_DEV
+            - kick_rip-it
+      - vendor_ensure-nightly-regression-suite
+      - sys_v2-edge4
+      - preflight_update-dashboard
+      - ensure-nightly-regression-suite:
+          requires:
+            - vendor_ensure-nightly-regression-suite
+            - sys_v2-edge4
+            - preflight_update-dashboard
+      - v2-edge4:
+          requires:
+            - vendor_ensure-nightly-regression-suite
+            - sys_v2-edge4
+            - preflight_update-dashboard
+      - update-dashboard:
+          requires:
+            - vendor_ensure-nightly-regression-suite
+            - sys_v2-edge4
+            - preflight_update-dashboard
+      - ShipStaging:
+          requires:
+            - vendor_ensure-nightly-regression-suite
+            - sys_v2-edge4
+            - preflight_update-dashboard
+      - Launch_Suite9:
+          requires:
+            - vendor_ensure-nightly-regression-suite
+            - sys_v2-edge4
+            - preflight_update-dashboard
+      - dan-ci:
+          requires:
+            - vendor_ensure-nightly-regression-suite
+            - sys_v2-edge4
+            - preflight_update-dashboard
+      - vb:
+          requires:
+            - vendor_ensure-nightly-regression-suite
+            - sys_v2-edge4
+            - preflight_update-dashboard
+      - titan:
+          requires:
+            - vendor_ensure-nightly-regression-suite
+            - sys_v2-edge4
+            - preflight_update-dashboard
+      - bob-ci:
+          requires:
+            - vendor_ensure-nightly-regression-suite
+            - sys_v2-edge4
+            - preflight_update-dashboard
+      - RolloutProd:
+          requires:
+            - vendor_ensure-nightly-regression-suite
+            - sys_v2-edge4
+            - preflight_update-dashboard
+      - verify:
+          requires:
+            - vendor_ensure-nightly-regression-suite
+            - sys_v2-edge4
+            - preflight_update-dashboard
+      - ruby3-build:
+          requires:
+            - vendor_ensure-nightly-regression-suite
+            - sys_v2-edge4
+            - preflight_update-dashboard
+      - PROD_HOOK_4:
+          requires:
+            - vendor_ensure-nightly-regression-suite
+            - sys_v2-edge4
+            - preflight_update-dashboard
